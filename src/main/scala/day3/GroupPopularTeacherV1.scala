@@ -28,7 +28,7 @@ object GroupPopularTeacherV1 {
     val reduced: RDD[((String, String), Int)] = subjectAndTeacherAndOne.reduceByKey(_ + _)
     val grouped: RDD[(String, Iterable[((String, String), Int)])] = reduced.groupBy((v: ((String, String), Int)) => v._1._1, 3)
     // toList会将executor的数据全部拉回到driver端，如果迭代器的数据特别多，可能会导致数据爆炸->面对这种场景程序需要做改进
-    val groupedSortedTop3: RDD[(String, List[(String, Int)])] = grouped.mapValues(_.toList.sortBy(_._2).reverse.map(v => (v._1._2, v._2)).take(3))
+    val groupedSortedTop3: RDD[(String, List[((String,String), Int)])] = grouped.mapValues(_.toList.sortBy(_._2).reverse.take(3))
     //    groupedSortedTop3.mapValues(v => (v.))
     val top3 = sc.parallelize(groupedSortedTop3.take(3))
     top3.saveAsTextFile(output)
